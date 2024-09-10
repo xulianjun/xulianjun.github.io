@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  
+  
+  
+  <entry>
+    <title>C/C++中的 extern 和 extern &quot;C&quot; 关键字详解（通俗易懂）</title>
+    <link href="/2024/09/11/C%E3%80%81C++%E4%B8%AD%E7%9A%84%20extern%20%E5%92%8C%20extern%20%E2%80%9CC%E2%80%9D%20%E5%85%B3%E9%94%AE%E5%AD%97%E8%AF%A6%E8%A7%A3%EF%BC%88%E9%80%9A%E4%BF%97%E6%98%93%E6%87%82%EF%BC%89/"/>
+    <url>/2024/09/11/C%E3%80%81C++%E4%B8%AD%E7%9A%84%20extern%20%E5%92%8C%20extern%20%E2%80%9CC%E2%80%9D%20%E5%85%B3%E9%94%AE%E5%AD%97%E8%AF%A6%E8%A7%A3%EF%BC%88%E9%80%9A%E4%BF%97%E6%98%93%E6%87%82%EF%BC%89/</url>
+    
+    <content type="html"><![CDATA[<p>转载自：<a href="https://blog.csdn.net/ytt999/article/details/139352522">C&#x2F;C++中的 extern 和 extern “C” 关键字详解（通俗易懂）</a></p><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>C&#x2F;C++ extern关键字用法<br>extern “C”用法</p><h2 id="extern关键字"><a href="#extern关键字" class="headerlink" title="extern关键字"></a>extern关键字</h2><p>extern其实就是一个声明，明确指出一个语句是声明，比如<code>extern int i</code>;这是声明变量<code>i</code>，而不是定义<code>i</code>，定义<code>i</code>则是<code>int i</code>（声明不开辟内存空间，而定义是要开辟内存空间的）</p><h3 id="适用于简单项目，几个文件之间的调用"><a href="#适用于简单项目，几个文件之间的调用" class="headerlink" title="适用于简单项目，几个文件之间的调用"></a>适用于简单项目，几个文件之间的调用</h3><p>extern可以声明一个变量，表示该变量来自其他文件，在此文件中可以被访问。<br>比如，目前创建了两个c文件，分别是test.c和main.c,如果在main.c中想获取test.c中的<code>i</code>变量，则只要在main.c的文件中加上这么一行：<code>extern int i</code></p><div class="code-wrapper"><pre><code class="hljs c"><span class="hljs-comment">// test.c文件</span><span class="hljs-type">int</span> i = <span class="hljs-number">5</span>;</code></pre></div><div class="code-wrapper"><pre><code class="hljs c"><span class="hljs-comment">// main.c文件</span><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><span class="hljs-keyword">extern</span> <span class="hljs-type">int</span> i;<span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span>&#123; <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;i=%d\n&quot;</span>, i);    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;&#125;</code></pre></div><h3 id="适合用于大工程"><a href="#适合用于大工程" class="headerlink" title="适合用于大工程"></a>适合用于大工程</h3><p>假如我有一个大工程，这个工程有超级多的文件，这些文件假如都要访问test.c文件的变量<code>i</code>,那么，只能在这些文件中，每个文件的开头都声明变量<code>i</code>,并且，假如我的test.c，不止一个定义一个变量<code>i</code>,有好多其他变量呢？在其他文件访问时候，都要声明好多变量，这会使得书写难度很繁琐，并且维护成本也大。</p><p>所以，可以把声明语句放到一个头文件中去使用，即定义一个test.h的头文件，在该头文件中添加声明，然后当有其他文件需要调用这些变量时，之间调用此头文件即可。</p><div class="code-wrapper"><pre><code class="hljs c"><span class="hljs-comment">// test.c文件</span><span class="hljs-type">int</span> i = <span class="hljs-number">5</span>;<span class="hljs-type">int</span> b = <span class="hljs-number">6</span>;<span class="hljs-type">int</span> b = <span class="hljs-number">7</span>;</code></pre></div><div class="code-wrapper"><pre><code class="hljs h"><span class="hljs-comment">// test.h</span><span class="hljs-keyword">extern</span> <span class="hljs-type">int</span> i = <span class="hljs-number">5</span>;<span class="hljs-keyword">extern</span> <span class="hljs-type">int</span> b = <span class="hljs-number">6</span>;<span class="hljs-keyword">extern</span> <span class="hljs-type">int</span> b = <span class="hljs-number">7</span>;</code></pre></div><div class="code-wrapper"><pre><code class="hljs c"><span class="hljs-comment">// main.c文件</span><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;test.h&quot;</span></span><span class="hljs-comment">// extern int i; 不再需要用此方式，改为调用test.h头文件即可</span><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span>&#123;    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;i=%d\n&quot;</span>,i);    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;&#125;</code></pre></div><h2 id="extern-“C”-用法"><a href="#extern-“C”-用法" class="headerlink" title="extern “C” 用法"></a>extern “C” 用法</h2><p>在C++中，<code>extern &quot;C&quot;</code>修饰的语句是为了编译器按照c的方式去进行编译的，为什么需要这样呢，是因为，如果在cpp文件中调用了c函数，那么就需要对这些c函数进行<code>extern &quot;C&quot;</code>操作，从而在编译cpp程序时，调用这些函数的时候，这些函数要按照c编译。</p><h3 id="第一种情况"><a href="#第一种情况" class="headerlink" title="第一种情况"></a>第一种情况</h3><p>果main.cpp文件要调用c函数接口，只要在main.cpp里面包含c函数接口用用extern “C” 括起来即可<br>例如：</p><div class="code-wrapper"><pre><code class="hljs cpp"><span class="hljs-comment">// main.cpp文件</span><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;iostream&gt;</span></span><span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;<span class="hljs-keyword">extern</span> “C”  <span class="hljs-comment">// 用extern“C”&#123; &#125;声明math.c文件中的函数，以至于可以在main.cpp文件使用。</span>&#123;    <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">add</span><span class="hljs-params">(<span class="hljs-type">int</span> x, <span class="hljs-type">int</span> y)</span></span>;    <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">sub</span><span class="hljs-params">(<span class="hljs-type">int</span> x, <span class="hljs-type">int</span> y)</span></span>; &#125;<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><span class="hljs-function"></span>&#123;    cout &lt;&lt; <span class="hljs-built_in">add</span>(<span class="hljs-number">10</span>, <span class="hljs-number">20</span>) &lt;&lt; endl; <span class="hljs-comment">//由于有声明该函数，所以访问成功，结果30</span>    cout &lt;&lt; <span class="hljs-built_in">sub</span>(<span class="hljs-number">10</span>, <span class="hljs-number">20</span>) &lt;&lt; endl;<span class="hljs-comment">//由于有声明该函数，所以访问成功，结果-10</span>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;&#125;</code></pre></div><h3 id="第二种情况"><a href="#第二种情况" class="headerlink" title="第二种情况"></a>第二种情况</h3><p>简单情况下，如果main.cpp文件要调用c函数接口，只要在main.cpp里面包含c函数接口的头文件math.h，并且用extern “C” 括起来即可，代表math.c的函数按照c编译<br>例如：</p><div class="code-wrapper"><pre><code class="hljs h"><span class="hljs-comment">// math.h</span><span class="hljs-type">int</span> <span class="hljs-title function_">add</span><span class="hljs-params">()</span>;<span class="hljs-type">int</span> <span class="hljs-title function_">sub</span><span class="hljs-params">()</span>;</code></pre></div><div class="code-wrapper"><pre><code class="hljs c"><span class="hljs-comment">// math.c</span><span class="hljs-type">int</span> <span class="hljs-title function_">add</span><span class="hljs-params">()</span>&#123; &#125;<span class="hljs-type">int</span> <span class="hljs-title function_">sub</span><span class="hljs-params">()</span>&#123; &#125;</code></pre></div><div class="code-wrapper"><pre><code class="hljs cpp"><span class="hljs-comment">// main.cpp</span><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;iostream&gt;</span></span><span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;<span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C&quot;</span>&#123;    <span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;math.h&quot;</span></span>&#125;</code></pre></div><p>以上两种情况是比较简单的，但是如果现在有三个文件，分别是main.cpp、math.h、main1.c，如果math.h头文件中存在个别函数用<code>extern &quot;C&quot;</code>包含了，main.cpp包含math.h头文件不会有问题，但是main1.c文件包含math.h头文件的时候，会不识别<code>extern &quot;C&quot;</code>从而报错，这种情况，就需要宏<code>#define __cplusplus</code></p><div class="code-wrapper"><pre><code class="hljs h"><span class="hljs-comment">// math.h文件的内容 </span><span class="hljs-comment">//意思是如果使用该头文件math.h的文件定义了__cplusplus，</span><span class="hljs-comment">//则下面代码到#endif都是有效的,在这里是 extern &quot;C&quot; &#123; 有效</span><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> __cplusplus </span><span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C&quot;</span> &#123;<span class="hljs-meta">#<span class="hljs-keyword">endif</span>  <span class="hljs-comment">//__cplusplus</span></span><span class="hljs-type">int</span> <span class="hljs-title function_">add</span> <span class="hljs-params">(<span class="hljs-type">int</span> x,<span class="hljs-type">int</span> y)</span>;<span class="hljs-comment">//加法</span><span class="hljs-type">int</span> <span class="hljs-title function_">sub</span><span class="hljs-params">(<span class="hljs-type">int</span> x,<span class="hljs-type">int</span> y)</span>;<span class="hljs-comment">//减法</span><span class="hljs-type">int</span> <span class="hljs-title function_">mult</span><span class="hljs-params">(<span class="hljs-type">int</span> x,<span class="hljs-type">int</span> y)</span>;<span class="hljs-comment">//乘法</span><span class="hljs-type">int</span> <span class="hljs-title function_">div</span><span class="hljs-params">(<span class="hljs-type">int</span> x,<span class="hljs-type">int</span> y)</span>; <span class="hljs-comment">//除法</span><span class="hljs-comment">//意思是如果使用该头文件math.h的文件定义了__cplusplus，</span><span class="hljs-comment">//则下面代码到#endif都是有效的,在这里是 &#125; 有效</span><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> __cplusplus</span>&#125;<span class="hljs-meta">#<span class="hljs-keyword">endif</span>  <span class="hljs-comment">//__cplusplus</span></span></code></pre></div><h3 id="第三种情况（最优解）"><a href="#第三种情况（最优解）" class="headerlink" title="第三种情况（最优解）"></a>第三种情况（最优解）</h3><p>创建的任何一个.cpp文件中，默认定义一个宏<code>#define __cplusplus</code>，这个宏是你看不到的，是编译器默认给每个.cpp文件创建的，而在.c文件，即C语言的编译器，是没有这个宏的，所以我们可以借助它，来在math.h文件中使用上面的代码。</p><p>在main.cpp文件中你直接包含该头文件math.h就可以使用了；<br>在main1.c文件中你直接包含该头文件math.h就可以使用了；</p><p>只要按上面的方式书写，那么就可以完美的解决了在C文件和C++文件中混用的问题；你既可以在.c文件使用该头文件，也可以在.cpp文件中使用该文件库。</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>两者<code>extern</code>和<code>extern &quot;C&quot;</code>有点区别：<br><code>extren</code>在C和C++中，都表示声明语句的意思；<br>而<code>extern &quot;C&quot;</code>是按C语言方式去编译文件；<br><code>extern &quot;C&quot;</code>只能在C++文件使用，<code>extern</code>在C和C++都可以使用</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>C++基础</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>C语言</tag>
+      
+      <tag>C++</tag>
+      
+      <tag>转载</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>VSCode个人配置</title>
+    <link href="/2024/09/11/VSCode%E4%B8%AA%E4%BA%BA%E9%85%8D%E7%BD%AE/"/>
+    <url>/2024/09/11/VSCode%E4%B8%AA%E4%BA%BA%E9%85%8D%E7%BD%AE/</url>
+    
+    <content type="html"><![CDATA[<p>一些个人使用的VSCode常用配置。</p><h2 id="保存时自动格式化"><a href="#保存时自动格式化" class="headerlink" title="保存时自动格式化"></a>保存时自动格式化</h2><div class="code-wrapper"><pre><code class="hljs json">editor.formatOnSave</code></pre></div>]]></content>
+    
+    
+    <categories>
+      
+      <category>VSCode配置</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>VSCode</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>VSCode配置C++调试环境</title>
+    <link href="/2024/09/10/VSCode%E9%85%8D%E7%BD%AEC++%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83/"/>
+    <url>/2024/09/10/VSCode%E9%85%8D%E7%BD%AEC++%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83/</url>
+    
+    <content type="html"><![CDATA[<p>VSCode是一款轻量的代码编辑器，其本身没有编译运行代码的功能。但是通过MinGW64+CMake配置，我们可以在VSCode上运行和调试C++代码。</p><h2 id="安装环境"><a href="#安装环境" class="headerlink" title="安装环境"></a>安装环境</h2><h3 id="安装MinGW64"><a href="#安装MinGW64" class="headerlink" title="安装MinGW64"></a>安装MinGW64</h3><p>参考文章：<a href="https://www.cnblogs.com/aczarwang/p/12406030.html">Windows 环境下安装 MinGW-W64&#x2F;GCC</a></p><h3 id="安装CMake"><a href="#安装CMake" class="headerlink" title="安装CMake"></a>安装CMake</h3><p>参考文章：<a href="https://www.runoob.com/cmake/cmake-install-setup.html">CMake 安装与配置</a></p><h3 id="安装VSCode插件"><a href="#安装VSCode插件" class="headerlink" title="安装VSCode插件"></a>安装VSCode插件</h3><p>安装扩展包：C&#x2F;C++ Extension Pack。<br>其中包含：C&#x2F;C++、C&#x2F;C++ Themes和CMake Tools。<br>安装CMake插件。</p><h2 id="单文件调试"><a href="#单文件调试" class="headerlink" title="单文件调试"></a>单文件调试</h2><p>在工作区只有单个.cpp文件，选中文件使用F5直接调试。</p><h2 id="多文件调试"><a href="#多文件调试" class="headerlink" title="多文件调试"></a>多文件调试</h2><h3 id="测试多文件项目结构"><a href="#测试多文件项目结构" class="headerlink" title="测试多文件项目结构"></a>测试多文件项目结构</h3><div class="code-wrapper"><pre><code class="hljs txt">workspace ┣ include ┃ ┗ print.h ┣ src ┃ ┗ print.cpp ┗ main.cpp</code></pre></div><h3 id="编写CMakeLists-txt"><a href="#编写CMakeLists-txt" class="headerlink" title="编写CMakeLists.txt"></a>编写CMakeLists.txt</h3><div class="code-wrapper"><pre><code class="hljs CMake"><span class="hljs-keyword">cmake_minimum_required</span>(VERSION <span class="hljs-number">3.10</span>)        <span class="hljs-comment"># 设置需要的CMake最小版本，若没有这个会报告警</span><span class="hljs-keyword">project</span>(Multi-<span class="hljs-keyword">File</span>)                         <span class="hljs-comment"># 设置项目的名字，可任意填</span><span class="hljs-keyword">aux_source_directory</span>(src SRC_SUB)           <span class="hljs-comment"># 将src目录下的源文件放到SRC_SUB变量中</span><span class="hljs-keyword">aux_source_directory</span>(. SRC_CUR)             <span class="hljs-comment"># 将当前目录下的源文件放到SRC_CUR变量中</span><span class="hljs-keyword">add_executable</span>(main <span class="hljs-variable">$&#123;SRC_SUB&#125;</span> <span class="hljs-variable">$&#123;SRC_CUR&#125;</span>)  <span class="hljs-comment"># 指定使用SRC_SUB与SRC_CUR变量中的源文件生成目标文件main</span><span class="hljs-keyword">include_directories</span>(<span class="hljs-keyword">include</span>)                <span class="hljs-comment"># 将include目录加入包含的头文件目录</span></code></pre></div><h3 id="build构建"><a href="#build构建" class="headerlink" title="build构建"></a>build构建</h3><p>按快捷键<code>ctrl+shift+p</code>，搜索<code>CMake configure</code>配置项并选中。<br>第一次会选择编译器，我们选择之前配置好的MinGW64的编译器。<br>生成build文件。</p><h3 id="运行与调试"><a href="#运行与调试" class="headerlink" title="运行与调试"></a>运行与调试</h3><p>VSCode界面最下面一栏有运行按钮和调试按钮。<br>选中工作区，点击运行或调试按钮，即可运行或调试程序。<br>生成的可执行文件在build目录下。</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>VSCode配置</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>C++</tag>
+      
+      <tag>VSCode</tag>
+      
+      <tag>CMake</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Hexo + GitHub Action，零成本自动化部署个人博客</title>
+    <link href="/2024/09/08/Hexo%20+%20GitHub%20Action%EF%BC%8C%E9%9B%B6%E6%88%90%E6%9C%AC%E8%87%AA%E5%8A%A8%E5%8C%96%E9%83%A8%E7%BD%B2%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/"/>
+    <url>/2024/09/08/Hexo%20+%20GitHub%20Action%EF%BC%8C%E9%9B%B6%E6%88%90%E6%9C%AC%E8%87%AA%E5%8A%A8%E5%8C%96%E9%83%A8%E7%BD%B2%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
+    
+    <content type="html"><![CDATA[<p>使用Hexo建站，每次在本地修改或新增博客后，都要先构建生成静态页面，再将页面部署到服务器中。使用GitHub Action可以将Hexo的构建生成部署流程在GitHub服务器自动化运行，写好的博文通过git提交到代码仓后会自动更新到网站上，不用频繁操作命令行。</p><h3 id="前置条件"><a href="#前置条件" class="headerlink" title="前置条件"></a>前置条件</h3><p>已安装配置好VScode。<br>已安装配置好Node.js、Git、Hexo。</p><h3 id="初始化Hexo"><a href="#初始化Hexo" class="headerlink" title="初始化Hexo"></a>初始化Hexo</h3><p>创建一个blog文件夹，这是生成静态页面的基础。</p><div class="code-wrapper"><pre><code class="hljs bash">hexo init blog<span class="hljs-built_in">cd</span> blognpm install</code></pre></div><h3 id="在GitHub上新建两个仓库"><a href="#在GitHub上新建两个仓库" class="headerlink" title="在GitHub上新建两个仓库"></a>在GitHub上新建两个仓库</h3><p>其中一个私有仓存blog网站生成代码，另一个公有仓准备存生成的部署网站页面。</p><p>明确一下目标：修改网站样式、博客markdown文件等操作后，提交变更到私有仓，然后触发GitHub Action在服务器上进行Hexo构建生成静态网页文件，最后将静态网页文件提交到公有仓，使用GitHub Page呈现网站。有点前后端分离的思想。</p><p>创建的公有仓为：</p><div class="code-wrapper"><pre><code class="hljs git">https://github.com/&#123;user&#125;/&#123;repo&#125;.git</code></pre></div><p>其中{user}指用户名，{repo}指仓库名（{repo}最好为xxx.github.io形式的）。</p><h3 id="创建Token"><a href="#创建Token" class="headerlink" title="创建Token"></a>创建Token</h3><p>Token至少带repo, workflow权限。</p><p>创建完毕后记下Token的值（后续使用{Token}指代Token的值），并将其添加到公有仓。</p><h3 id="修改-config-yml"><a href="#修改-config-yml" class="headerlink" title="修改_config.yml"></a>修改_config.yml</h3><p>此项repo的值为使用Token访问公有仓，，</p><div class="code-wrapper"><pre><code class="hljs yml"><span class="hljs-attr">deploy:</span>  <span class="hljs-attr">type:</span> <span class="hljs-string">git</span>  <span class="hljs-attr">repo:</span> <span class="hljs-string">https://&#123;Token&#125;@github.com/&#123;user&#125;/&#123;repo&#125;.git</span>    <span class="hljs-comment"># 保存静态网页文件的公开仓</span>  <span class="hljs-attr">branch:</span> <span class="hljs-string">main</span></code></pre></div><h3 id="配置Github-Action工作流"><a href="#配置Github-Action工作流" class="headerlink" title="配置Github Action工作流"></a>配置Github Action工作流</h3><p>在.github文件夹下新增workflows文件夹，然后新增deploy.yml文件，内容如下。</p><p>里面有个node-version要和你本地的node一致。</p><p>步骤大致意思就是使用ubuntu-latest作为基础环境，然后安装各种依赖，随后hexo generate生成博客网站静态文件夹，最后把这个文件夹推送到公开仓库的main分支。</p><div class="code-wrapper"><pre><code class="hljs yml"><span class="hljs-attr">name:</span> <span class="hljs-string">Deploy</span> <span class="hljs-string">Hexo</span> <span class="hljs-string">to</span> <span class="hljs-string">GitHub</span> <span class="hljs-string">Pages</span><span class="hljs-attr">on:</span>  <span class="hljs-attr">push:</span>    <span class="hljs-attr">branches:</span>      <span class="hljs-bullet">-</span> <span class="hljs-string">main</span>  <span class="hljs-comment"># 当推送到 main 分支时触发</span><span class="hljs-attr">jobs:</span>  <span class="hljs-attr">build:</span>    <span class="hljs-attr">runs-on:</span> <span class="hljs-string">ubuntu-latest</span>    <span class="hljs-attr">steps:</span>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Checkout</span> <span class="hljs-string">repository</span>        <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/checkout@v2</span>        <span class="hljs-attr">with:</span>          <span class="hljs-attr">submodules:</span> <span class="hljs-literal">false</span>  <span class="hljs-comment"># 禁用子模块检查</span>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Setup</span> <span class="hljs-string">Node.js</span>        <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/setup-node@v2</span>        <span class="hljs-attr">with:</span>          <span class="hljs-attr">node-version:</span> <span class="hljs-string">&#x27;v20.17.0&#x27;</span>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Install</span> <span class="hljs-string">Dependencies</span>        <span class="hljs-attr">run:</span> <span class="hljs-string">npm</span> <span class="hljs-string">install</span>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Install</span> <span class="hljs-string">Hexo</span> <span class="hljs-string">Git</span> <span class="hljs-string">Deployer</span>        <span class="hljs-attr">run:</span> <span class="hljs-string">|</span><span class="hljs-string">          npm install hexo-deployer-git --save</span><span class="hljs-string">          npm install hexo-cli -g</span><span class="hljs-string"></span>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Clean</span> <span class="hljs-string">and</span> <span class="hljs-string">Generate</span> <span class="hljs-string">Static</span> <span class="hljs-string">Files</span>        <span class="hljs-attr">run:</span> <span class="hljs-string">|</span><span class="hljs-string">          hexo clean</span><span class="hljs-string">          hexo generate</span><span class="hljs-string"></span>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Configure</span> <span class="hljs-string">Git</span>        <span class="hljs-attr">run:</span> <span class="hljs-string">|</span><span class="hljs-string">          git config --global user.name &#x27;github-actions[bot]&#x27;</span><span class="hljs-string">          git config --global user.email &#x27;github-actions[bot]@users.noreply.github.com&#x27;</span><span class="hljs-string"></span>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">Deploy</span> <span class="hljs-string">to</span> <span class="hljs-string">GitHub</span> <span class="hljs-string">Pages</span>        <span class="hljs-attr">run:</span> <span class="hljs-string">|</span><span class="hljs-string">          cd public/</span><span class="hljs-string">          git init</span><span class="hljs-string">          git add -A</span><span class="hljs-string">          git commit -m &quot;Create by workflows&quot;</span><span class="hljs-string">          git branch -M main</span><span class="hljs-string">          git remote add origin https://&#123;Token&#125;@github.com/&#123;user&#125;/&#123;repo&#125;.git    # 保存静态网页文件的公开仓</span><span class="hljs-string">          git push origin HEAD:main -f</span></code></pre></div><h3 id="推送验证"><a href="#推送验证" class="headerlink" title="推送验证"></a>推送验证</h3><p>把刚才更新的所有文件都推送一遍，github就会触发工作流，然后去网站看工作流运转的如何。</p><p>若一切无误，应当在公开仓出现更新后的静态网页文件。</p><h3 id="配置Github-Pages"><a href="#配置Github-Pages" class="headerlink" title="配置Github Pages"></a>配置Github Pages</h3><p>存有静态网页文件的代码仓设置中的Github Pages选项开启。</p><p>若{repo}为xxx.github.io形式，博客网站的域名就是{repo}的值。</p><h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="https://www.bilibili.com/video/BV1xTgTemEDU">Bilibili视频教程-9分钟零成本搭建自动化部署个人博客(Hexo + Github Action + Page)</a><br><a href="https://xiamu-ssr.github.io/Hexo/2024/06/19/2024-H1/2024-06-19-12-31-52/">如何优雅的使用Github Action服务来将Hexo部署到Github Pages</a></p>]]></content>
+    
+    
+    <categories>
+      
+      <category>博客搭建</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Hexo</tag>
+      
+      <tag>GitHub Action</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  
+</search>
